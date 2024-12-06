@@ -149,6 +149,7 @@
           // Calculo para determinar cuando no se ha cumplido años en ese año
           if (months <= 0 && days < 0) {
             years--;
+            months = 11 + months;
           }
 
           // Calculo para determinar la cantidad de dias teniendo en cuenta la cantidad de dias del mes anterior ya que todos los meses no tienen la misma cantidad de dias
