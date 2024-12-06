@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+    </style>
+
+    <title>Frontend Mentor | Age calculator app</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "hsl(259, 100%, 65%)",
+              lightRed: "hsl(0, 100%, 67%)",
+              white: "hsl(0, 0%, 100%)",
+              offWhite: "hsl(0, 0%, 94%)",
+              lightGrey: "hsl(0, 0%, 86%)",
+              smokeyGrey: "hsl(0, 1%, 44%)",
+              offBlack: "hsl(0, 0%, 8%)",
+            },
+            fontFamily: {
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="font-poppins bg-offWhite h-screen flex justify-center items-center p-4"
+  >
+    <article
+      class="bg-white p-4 py-12 rounded-2xl w-full rounded-ee-[100px] max-w-2xl"
+    >
+      <form
+        class="flex gap-4 [&>fieldset]:grid [&>fieldset]:gap-1 [&>fieldset>input]:w-full [&>fieldset>input]:max-w-[130px] uppercase [&>fieldset>label]:text-sm [&>fieldset>label]:text-smokeyGrey [&>fieldset>label]:font-bold [&>fieldset>input]:border [&>fieldset>input]:p-3 [&>fieldset>input]:text-xl [&>fieldset>input]:font-bold [&>fieldset>input]:outline-none [&>fieldset>input]:rounded-xl [&>fieldset>input]:border-lightGrey [&>fieldset>span]:text-[10px] [&>fieldset>span]:text-lightRed [&>fieldset>span]:opacity-0 [&>.error>label]:text-lightRed [&>.error>input]:border-lightRed [&>.error>span]:opacity-100 dateForm"
+        id="dateForm"
+      >
+        <fieldset>
+          <label>Day</label>
+          <input name="days" type="number" placeholder="DD" />
+          <span>Must be a valid day</span>
+        </fieldset>
+        <fieldset>
+          <label>Month</label>
+          <input name="months" type="number" placeholder="MM" />
+          <span>Must be a valid month</span>
+        </fieldset>
+        <fieldset>
+          <label>Year</label>
+          <input name="years" type="number" placeholder="YYYY" />
+          <span>Must be a valid year</span>
+        </fieldset>
+      </form>
+
+      <div class="relative">
+        <hr class="my-16 h-[2px] bg-lightGrey" />
+        <button
+          form="dateForm"
+          class="bg-primary h-14 aspect-square p-4 rounded-full absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 hover:bg-offBlack transition-colors sm:left-full sm:-translate-x-full sm:h-16"
+        >
+          <img src="./assets/images/icon-arrow.svg" alt="" />
+        </button>
+      </div>
+
+      <div
+        class="text-5xl sm:text-6xl font-extrabold [&>div>span:nth-child(1)]:text-primary italic"
+      >
+        <!-- Years -->
+        <div>
+          <span class="years">--</span>
+          <span>years</span>
+        </div>
+
+        <!-- Months -->
+        <div>
+          <span class="months">--</span>
+          <span>months</span>
+        </div>
+
+        <!-- Days -->
+        <div>
+          <span class="days">--</span>
+          <span>days</span>
+        </div>
+      </div>
+    </article>
+    <script>
+      const dateForm = document.querySelector(".dateForm");
+      const yearsText = document.querySelector(".years");
+      const monthsText = document.querySelector(".months");
+      const daysText = document.querySelector(".days");
+
+      const isAValidDay = (day) => day >= 1 && day <= 31;
+      const isAValidMonth = (month) => month >= 1 && month <= 12;
+      const isAValidYear = (year) =>
+        year >= 1900 && year <= new Date().getFullYear();
+
+      dateForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(dateForm);
+        const data = Object.fromEntries(formData);
+
+        const today = new Date();
+        const birthDate = new Date(
+          data.years,
+          Number(data.months) - 1,
+          data.days
+        );
+
+        const errors = [
+          isAValidDay(Number(data.days)) && data.days !== "",
+          isAValidMonth(Number(data.months)) && data.months !== "",
+          isAValidYear(Number(data.years)) && data.years !== "",
+        ];
+
+        errors.forEach((isValidDate, index) => {
+          if (isValidDate) {
+            dateForm.children[index].classList.remove("error");
+            return;
+          }
+          dateForm.children[index].classList.add("error");
+        });
+
+        const allFieldsAreValid = errors.every((isValidDate) => isValidDate);
+
+        let years = "--";
+        let months = "--";
+        let days = "--";
+
+        if (today > birthDate && allFieldsAreValid) {
+          // Situacion idel, solo cuando ya se cumplio años
+          years = today.getFullYear() - birthDate.getFullYear();
+          months = today.getMonth() - birthDate.getMonth();
+          days = today.getDate() - birthDate.getDate();
+
+          // Calculo para determinar cuando no se ha cumplido años en ese año
+          if (months <= 0 && days < 0) {
+            years--;
+          }
+
+          // Calculo para determinar la cantidad de dias teniendo en cuenta la cantidad de dias del mes anterior ya que todos los meses no tienen la misma cantidad de dias
+          if (days < 0) {
+            let quantityDaysPrevMonth = 28;
+            const prevMonthDate = new Date(
+              today.getFullYear(),
+              today.getMonth() - 1, // Mes anterior
+              quantityDaysPrevMonth
+            );
+
+            while (prevMonthDate.getDate() !== 1) {
+              quantityDaysPrevMonth = prevMonthDate.getDate();
+              prevMonthDate.setDate(prevMonthDate.getDate() + 1);
+            }
+
+            const restDaysToNow =
+              quantityDaysPrevMonth - birthDate.getDate() + today.getDate();
+            days = restDaysToNow;
+          }
+        }
+
+        yearsText.textContent = years;
+        monthsText.textContent = months;
+        daysText.textContent = days;
+
+        // Reto adicional 1: Hacer que el mensaje sea correspondiente según si el campo esta vacio o si es un error de formato de fecha
+
+        // Reto adicional 2: Agregar la validación para que en el día valide si es un dia correcto del mes porque no todos los meses tienen 31 días puede que precisamente en ese mes solo haya máximo 28 o 29 entonces el 30 y 31 no son validos.
+      });
+    </script>
+  </body>
+</html>
